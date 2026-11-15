@@ -10,6 +10,7 @@ builder.Services.AddDbContext<BaseDatos>(options => options.UseSqlServer(db));
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<IProductoInterface, ProductoService>();
+builder.Services.AddScoped<IProveedorInterface, ProveedorService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
