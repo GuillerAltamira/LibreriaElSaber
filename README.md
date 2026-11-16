@@ -28,5 +28,4 @@ Proyecto desarrollado para la implementación de la capa de acceso a datos y ló
 ## ⚙️ Instrucciones de Configuración y Conexión
 
 1. Clona el repositorio en tu computadora:
-   ```bash
-   git clone [https://github.com/GuillerAltamira/LibreriaElSaber.git](https://github.com/GuillerAltamira/LibreriaElSaber.git)
+   git clone https://github.com/GuillerAltamira/LibreriaElSaber.git
