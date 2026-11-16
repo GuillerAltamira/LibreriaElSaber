@@ -6,11 +6,15 @@ using WebApplication1.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 var db = builder.Configuration.GetConnectionString("ConexionDB");
-builder.Services.AddDbContext<BaseDatos>(options => options.UseSqlServer(db));
+
+builder.Services.AddDbContext<BaseDatos>(options =>
+    options.UseSqlServer(db));
 
 builder.Services.AddControllers();
+
 builder.Services.AddScoped<IProductoInterface, ProductoService>();
 builder.Services.AddScoped<IProveedorInterface, ProveedorService>();
+builder.Services.AddScoped<ICompraInterface, CompraService>();
 builder.Services.AddScoped<IVentaInterface, VentaService>();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -27,4 +31,5 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+
 app.Run();

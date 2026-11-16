@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
+using Microsoft.EntityFrameworkCore;
 using WebApplication1.Models;
 
 namespace WebApplication1.Data
@@ -29,7 +30,13 @@ namespace WebApplication1.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // ===== PROVEEDOR =====
+            // PRODUCTO
+            modelBuilder.Entity<Producto>(entity =>
+            {
+                entity.Property(p => p.Precio).HasPrecision(18, 2);
+            });
+
+            // PROVEEDOR
             modelBuilder.Entity<Proveedor>(entity =>
             {
                 entity.ToTable("proveedores");
@@ -47,7 +54,7 @@ namespace WebApplication1.Data
                 entity.Property(p => p.FechaRegistro).HasDefaultValueSql("GETDATE()");
             });
 
-            // ===== COMPRA =====
+            // COMPRA
             modelBuilder.Entity<Compra>(entity =>
             {
                 entity.ToTable("compras");
@@ -66,7 +73,7 @@ namespace WebApplication1.Data
                 entity.HasIndex(c => c.Fecha);
             });
 
-            // ===== DETALLE COMPRA =====
+            // DETALLE DE COMPRA
             modelBuilder.Entity<DetalleCompra>(entity =>
             {
                 entity.ToTable("detalle_compras", t =>
@@ -87,7 +94,7 @@ namespace WebApplication1.Data
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // ===== MODULO DE VENTAS (GarantesTatianaMarset) =====
+            // MODULO DE VENTAS
             modelBuilder.Entity<Venta>(entity =>
             {
                 entity.ToTable("ventas");
