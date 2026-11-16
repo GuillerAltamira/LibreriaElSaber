@@ -7,10 +7,23 @@ namespace WebApplication1.Data
     {
         public BaseDatos(DbContextOptions<BaseDatos> options) : base(options) { }
 
+        public BaseDatos() { }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=LibreriaElSaberDb;Trusted_Connection=True;MultipleActiveResultSets=true");
+            }
+        }
+
         public DbSet<Producto> productos { get; set; }
         public DbSet<Proveedor> proveedores { get; set; }
         public DbSet<Compra> compras { get; set; }
         public DbSet<DetalleCompra> detalleCompras { get; set; }
+        public DbSet<Venta> ventas { get; set; }
+        public DbSet<DetalleVenta> detallesVenta { get; set; }
+        public DbSet<Factura> facturas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,14 +37,14 @@ namespace WebApplication1.Data
 
                 entity.Property(p => p.Nombre).IsRequired().HasMaxLength(100);
                 entity.Property(p => p.Nit).IsRequired().HasMaxLength(20);
-                entity.HasIndex(p => p.Nit).IsUnique();                 // UNIQUE
+                entity.HasIndex(p => p.Nit).IsUnique();
 
-                entity.Property(p => p.Telefono).HasMaxLength(20);      // NULL permitido
+                entity.Property(p => p.Telefono).HasMaxLength(20);
                 entity.Property(p => p.Correo).HasMaxLength(100);
                 entity.Property(p => p.Direccion).HasMaxLength(200);
 
                 entity.Property(p => p.Activo).IsRequired();
-                entity.Property(p => p.FechaRegistro).HasDefaultValueSql("GETDATE()"); // valor por defecto
+                entity.Property(p => p.FechaRegistro).HasDefaultValueSql("GETDATE()");
             });
 
             // ===== COMPRA =====
@@ -44,18 +57,16 @@ namespace WebApplication1.Data
                 entity.Property(c => c.Fecha).HasDefaultValueSql("GETDATE()");
                 entity.Property(c => c.Total).HasPrecision(18, 2);
 
-                // Proveedor 1 --- * Compras
                 entity.HasOne(c => c.Proveedor)
                       .WithMany(p => p.Compras)
                       .HasForeignKey(c => c.ProveedorId)
                       .OnDelete(DeleteBehavior.Restrict);
 
-                // Un proveedor no puede repetir número de factura
                 entity.HasIndex(c => new { c.ProveedorId, c.NumeroFactura }).IsUnique();
                 entity.HasIndex(c => c.Fecha);
             });
 
-            // ===== DETALLE COMPRA (resuelve Compra * --- * Producto) =====
+            // ===== DETALLE COMPRA =====
             modelBuilder.Entity<DetalleCompra>(entity =>
             {
                 entity.ToTable("detalle_compras", t =>
@@ -74,6 +85,47 @@ namespace WebApplication1.Data
                       .WithMany()
                       .HasForeignKey(d => d.ProductoId)
                       .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ===== MODULO DE VENTAS (GarantesTatianaMarset) =====
+            modelBuilder.Entity<Venta>(entity =>
+            {
+                entity.ToTable("ventas");
+                entity.HasKey(v => v.Id);
+                entity.Property(v => v.Total).HasPrecision(18, 2);
+                entity.Property(v => v.Fecha).HasDefaultValueSql("GETDATE()");
+            });
+
+            modelBuilder.Entity<DetalleVenta>(entity =>
+            {
+                entity.ToTable("detalle_ventas");
+                entity.HasKey(d => d.Id);
+                entity.Property(d => d.PrecioUnitario).HasPrecision(18, 2);
+                entity.Property(d => d.Subtotal).HasPrecision(18, 2);
+
+                entity.HasOne(d => d.Producto)
+                    .WithMany()
+                    .HasForeignKey(d => d.ProductoId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(d => d.Venta)
+                    .WithMany(v => v.Detalles)
+                    .HasForeignKey(d => d.VentaId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Factura>(entity =>
+            {
+                entity.ToTable("facturas");
+                entity.HasKey(f => f.Id);
+                entity.Property(f => f.FechaEmision).HasDefaultValueSql("GETDATE()");
+
+                entity.HasOne(f => f.Venta)
+                    .WithOne(v => v.Factura)
+                    .HasForeignKey<Factura>(f => f.VentaId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(f => f.VentaId).IsUnique();
             });
         }
     }

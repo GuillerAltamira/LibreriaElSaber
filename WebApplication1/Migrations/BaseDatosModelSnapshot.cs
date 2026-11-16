@@ -90,6 +90,72 @@ namespace WebApplication1.Migrations
                         });
                 });
 
+            modelBuilder.Entity("WebApplication1.Models.DetalleVenta", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PrecioUnitario")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("ProductoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("VentaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductoId");
+
+                    b.HasIndex("VentaId");
+
+                    b.ToTable("detalle_ventas", (string)null);
+                });
+
+            modelBuilder.Entity("WebApplication1.Models.Factura", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("FechaEmision")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("NIT")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NumeroFactura")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RazonSocial")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("VentaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VentaId")
+                        .IsUnique();
+
+                    b.ToTable("facturas", (string)null);
+                });
+
             modelBuilder.Entity("WebApplication1.Models.Producto", b =>
                 {
                     b.Property<Guid>("Id")
@@ -159,6 +225,30 @@ namespace WebApplication1.Migrations
                     b.ToTable("proveedores", (string)null);
                 });
 
+            modelBuilder.Entity("WebApplication1.Models.Venta", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Fecha")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<decimal>("Total")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ventas", (string)null);
+                });
+
             modelBuilder.Entity("WebApplication1.Models.Compra", b =>
                 {
                     b.HasOne("WebApplication1.Models.Proveedor", "Proveedor")
@@ -189,6 +279,36 @@ namespace WebApplication1.Migrations
                     b.Navigation("Producto");
                 });
 
+            modelBuilder.Entity("WebApplication1.Models.DetalleVenta", b =>
+                {
+                    b.HasOne("WebApplication1.Models.Producto", "Producto")
+                        .WithMany()
+                        .HasForeignKey("ProductoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("WebApplication1.Models.Venta", "Venta")
+                        .WithMany("Detalles")
+                        .HasForeignKey("VentaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Producto");
+
+                    b.Navigation("Venta");
+                });
+
+            modelBuilder.Entity("WebApplication1.Models.Factura", b =>
+                {
+                    b.HasOne("WebApplication1.Models.Venta", "Venta")
+                        .WithOne("Factura")
+                        .HasForeignKey("WebApplication1.Models.Factura", "VentaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Venta");
+                });
+
             modelBuilder.Entity("WebApplication1.Models.Compra", b =>
                 {
                     b.Navigation("Detalles");
@@ -197,6 +317,13 @@ namespace WebApplication1.Migrations
             modelBuilder.Entity("WebApplication1.Models.Proveedor", b =>
                 {
                     b.Navigation("Compras");
+                });
+
+            modelBuilder.Entity("WebApplication1.Models.Venta", b =>
+                {
+                    b.Navigation("Detalles");
+
+                    b.Navigation("Factura");
                 });
 #pragma warning restore 612, 618
         }
