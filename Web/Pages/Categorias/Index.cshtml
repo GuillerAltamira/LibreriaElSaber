@@ -1,0 +1,75 @@
+﻿@page
+@model Web.Pages.Categorias.IndexModel
+@{
+    ViewData["Title"] = "Categorías - Librería El Saber";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0 text-primary">Categorías</h2>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCategoria">
+        + Agregar Categoría
+    </button>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Mensaje))
+{
+    <div class="alert alert-primary alert-dismissible fade show" role="alert">
+        @Model.Mensaje
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<table class="table table-bordered table-striped">
+    <thead class="table-primary">
+        <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Categorias.Count == 0)
+        {
+            <tr>
+                <td colspan="2" class="text-center text-muted">No hay categorías registradas aún.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var cat in Model.Categorias)
+            {
+                <tr>
+                    <td>@cat.Nombre</td>
+                    <td>@cat.Descripcion</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<!-- Modal Agregar Categoría -->
+<div class="modal fade" id="modalCategoria" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-primary">
+            <form method="post">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Nueva Categoría</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input asp-for="NuevaCategoria.Nombre" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <input asp-for="NuevaCategoria.Descripcion" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

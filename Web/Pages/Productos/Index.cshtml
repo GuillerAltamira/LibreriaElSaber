@@ -1,0 +1,108 @@
+﻿@page
+@model Web.Pages.Productos.IndexModel
+@{
+    ViewData["Title"] = "Productos - Librería El Saber";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0 text-primary">Productos</h2>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalProducto">
+        + Agregar Producto
+    </button>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Mensaje))
+{
+    <div class="alert alert-primary alert-dismissible fade show" role="alert">
+        @Model.Mensaje
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<table class="table table-bordered table-striped align-middle">
+    <thead class="table-primary">
+        <tr>
+            <th>Imagen</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Descripción</th>
+            <th>Precio</th>
+            <th>Stock</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Productos.Count == 0)
+        {
+            <tr>
+                <td colspan="6" class="text-center text-muted">No hay productos registrados aún.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var prod in Model.Productos)
+            {
+                <tr>
+                    <td>
+                        @if (!string.IsNullOrWhiteSpace(prod.ImagenUrl))
+                        {
+                            <img src="@prod.ImagenUrl" alt="@prod.Nombre" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;" />
+                        }
+                    </td>
+                    <td>@prod.Nombre</td>
+                    <td>@(Model.NombresCategorias.TryGetValue(prod.CategoriaId, out var nombreCat) ? nombreCat : "-")</td>
+                    <td>@prod.Descripcion</td>
+                    <td>@prod.Precio</td>
+                    <td>@prod.Stock</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<!-- Modal Agregar Producto -->
+<div class="modal fade" id="modalProducto" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-primary">
+            <form method="post" enctype="multipart/form-data">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Nuevo Producto</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Categoría</label>
+                        <select asp-for="NuevoProducto.CategoriaId" asp-items="Model.OpcionesCategorias" class="form-select" required>
+                            <option value="">-- Selecciona una categoría --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input asp-for="NuevoProducto.Nombre" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <input asp-for="NuevoProducto.Descripcion" class="form-control" required />
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Precio</label>
+                            <input asp-for="NuevoProducto.Precio" type="number" step="0.01" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Stock</label>
+                            <input asp-for="NuevoProducto.Stock" type="number" class="form-control" required />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Imagen del producto (desde tu PC)</label>
+                        <input asp-for="ArchivoImagen" type="file" accept="image/*" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

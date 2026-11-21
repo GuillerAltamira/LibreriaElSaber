@@ -1,4 +1,4 @@
-﻿namespace WebApplication1.DTOs
+﻿namespace Contratos
 {
     public class ProductoDto
     {
