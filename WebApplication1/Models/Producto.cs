@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApplication1.Models
 {
@@ -7,16 +8,22 @@ namespace WebApplication1.Models
         [Key]
         public Guid Id { get; set; }
 
-        [Required(ErrorMessage = "El nombre del producto es requerido")]
-        public string? Nombre { get; set; }
+        [Required]
+        public string Nombre { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "La descripción es requerida")]
-        public string? Descripcion { get; set; }
+        [Required]
+        public string Descripcion { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "El precio es requerido")]
+        [Required]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Precio { get; set; }
 
-        [Required(ErrorMessage = "El stock es requerido")]
+        [Required]
         public int Stock { get; set; }
+
+        public string? ImagenUrl { get; set; }
+
+        [Required]
+        public Guid CategoriaId { get; set; }
     }
 }

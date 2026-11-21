@@ -19,6 +19,7 @@ namespace WebApplication1.Data
         }
 
         public DbSet<Producto> productos { get; set; }
+        public DbSet<Categoria> categorias { get; set; }
         public DbSet<Proveedor> proveedores { get; set; }
         public DbSet<Compra> compras { get; set; }
         public DbSet<DetalleCompra> detalleCompras { get; set; }
@@ -30,10 +31,25 @@ namespace WebApplication1.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // CATEGORIA
+            modelBuilder.Entity<Categoria>(entity =>
+            {
+                entity.ToTable("categorias");
+                entity.HasKey(c => c.Id);
+                entity.Property(c => c.Nombre).IsRequired().HasMaxLength(100);
+                entity.Property(c => c.Descripcion).HasMaxLength(250);
+            });
+
             // PRODUCTO
             modelBuilder.Entity<Producto>(entity =>
             {
                 entity.Property(p => p.Precio).HasPrecision(18, 2);
+                entity.Property(p => p.ImagenUrl).HasMaxLength(500);
+
+                entity.HasOne<Categoria>()
+                      .WithMany()
+                      .HasForeignKey(p => p.CategoriaId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // PROVEEDOR
