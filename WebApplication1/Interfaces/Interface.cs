@@ -1,4 +1,4 @@
-﻿using WebApplication1.DTOs;
+﻿using Contratos;
 using WebApplication1.Models;
 
 namespace WebApplication1.Interfaces
@@ -12,5 +12,6 @@ namespace WebApplication1.Interfaces
         Proveedor? Crear(ProveedorDto dto);                 // null = NIT ya existe
         ResultadoProveedor Modificar(Guid id, ProveedorDto dto);
         IEnumerable<HistorialCompraDto>? ObtenerHistorialCompras(Guid proveedorId); // null = proveedor no existe
+        IEnumerable<ResumenProveedorDto> ObtenerResumenCompras();                   // compras y total por proveedor
     }
 }

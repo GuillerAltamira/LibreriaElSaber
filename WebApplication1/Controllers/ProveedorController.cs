@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebApplication1.DTOs;
+using Contratos;
 using WebApplication1.Interfaces;
 
 namespace WebApplication1.Controllers
@@ -60,6 +60,12 @@ namespace WebApplication1.Controllers
             if (historial == null)
                 return NotFound("El proveedor no se encuentra registrado.");
             return Ok(historial);
+        }
+
+        [HttpGet("resumen-compras")]
+        public IActionResult ResumenCompras()
+        {
+            return Ok(_proveedorService.ObtenerResumenCompras());
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WebApplication1.DTOs
+namespace Contratos
 {
     public class ProveedorDto
     {
@@ -10,9 +10,11 @@ namespace WebApplication1.DTOs
 
         [Required(ErrorMessage = "El NIT es obligatorio")]
         [StringLength(20, ErrorMessage = "Máximo 20 caracteres")]
+        [RegularExpression(@"^\d{5,20}$", ErrorMessage = "El NIT debe tener solo números (mínimo 5)")]
         public string Nit { get; set; } = string.Empty;
 
         [StringLength(20)]
+        [RegularExpression(@"^[0-9+\s-]{7,20}$", ErrorMessage = "Teléfono no válido (solo números)")]
         public string? Telefono { get; set; }
 
         [EmailAddress(ErrorMessage = "Correo no válido")]

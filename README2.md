@@ -69,6 +69,9 @@ Endpoints: `/api/Producto`
 Registrar proveedores, actualizar su información y consultar su historial de compras.
 Endpoints: `/api/Proveedor`
 Tablas: `proveedores`, `compras`, `detalle_compras`
+DTOs en Contratos: `ProveedorDto`, `HistorialCompraDto`, `ResumenProveedorDto`
+Endpoint extra: `GET /api/Proveedor/resumen-compras` (compras y total por proveedor)
+Páginas Web: `/Proveedores` (tarjetas, gráficos Top 5 y estado, buscador, filtro, orden, paginación, exportar a Excel, registrar/editar en modal, activar/desactivar) y `/Proveedores/Historial/{id}` (gráfico por mes, detalle de facturas, imprimir/PDF)
 
 ### Gestión de Ventas – Grupo GarantesTatianaMarset
 _(Completar por el grupo)_
