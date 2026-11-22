@@ -4,72 +4,235 @@
     ViewData["Title"] = "Categorías - Librería El Saber";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="mb-0 text-primary">Categorías</h2>
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCategoria">
-        + Agregar Categoría
-    </button>
-</div>
+<style>
+    .saber-banner {
+        background: linear-gradient(90deg, #0a3d91 0%, #1565c0 55%, #0288d1 100%);
+        border-radius: 16px;
+        padding: 28px 32px;
+        color: #ffffff;
+        box-shadow: 0 10px 25px rgba(13, 71, 161, 0.16);
+    }
+
+    .saber-badge {
+        display: inline-block;
+        background-color: #00b8d4;
+        color: #ffffff;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 999px;
+        margin-bottom: 10px;
+    }
+
+    .saber-counter-box {
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 12px;
+        padding: 12px 20px;
+        min-width: 135px;
+        text-align: center;
+    }
+
+    .saber-btn-white {
+        background-color: #ffffff;
+        color: #0d47a1;
+        font-weight: 600;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 18px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+
+        .saber-btn-white:hover {
+            background-color: #f4f8ff;
+            color: #08306b;
+            transform: translateY(-1px);
+        }
+
+    .saber-btn-primary {
+        background-color: #1652f0;
+        color: #ffffff;
+        font-weight: 600;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 20px;
+        box-shadow: 0 6px 16px rgba(22, 82, 240, 0.25);
+        transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+
+        .saber-btn-primary:hover {
+            background-color: #1041c4;
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+    .saber-card {
+        background: #ffffff;
+        border: 1px solid #e9eef5;
+        border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(15, 23, 42, 0.04);
+        overflow: hidden;
+    }
+
+    .saber-card-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #eef2f7;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .saber-search {
+        border-radius: 999px;
+        padding: 8px 18px;
+        border: 1px solid #d7e0ea;
+        min-width: 240px;
+        font-size: 0.92rem;
+    }
+
+        .saber-search:focus {
+            border-color: #1652f0;
+            box-shadow: 0 0 0 3px rgba(22, 82, 240, 0.12);
+        }
+
+    .saber-table thead th {
+        background-color: #ffffff;
+        color: #1e293b;
+        font-weight: 700;
+        font-size: 0.92rem;
+        padding: 16px 24px;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .saber-table tbody td {
+        padding: 14px 24px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+    }
+
+    .saber-empty-state {
+        padding: 56px 20px;
+        text-align: center;
+    }
+</style>
 
 @if (!string.IsNullOrEmpty(Model.Mensaje))
 {
-    <div class="alert alert-primary alert-dismissible fade show" role="alert">
+    <div class="alert alert-primary alert-dismissible fade show rounded-3 shadow-sm mb-3" role="alert">
         @Model.Mensaje
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
 
-<table class="table table-bordered table-striped">
-    <thead class="table-primary">
-        <tr>
-            <th>Nombre</th>
-            <th>Descripción</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.Categorias.Count == 0)
-        {
-            <tr>
-                <td colspan="2" class="text-center text-muted">No hay categorías registradas aún.</td>
-            </tr>
-        }
-        else
-        {
-            @foreach (var cat in Model.Categorias)
-            {
-                <tr>
-                    <td>@cat.Nombre</td>
-                    <td>@cat.Descripcion</td>
-                </tr>
-            }
-        }
-    </tbody>
-</table>
+<div class="saber-banner mb-4">
+    <div class="row align-items-center g-3">
+        <div class="col-lg-8">
+            <span class="saber-badge">Librería El Saber · Catálogo</span>
+            <h1 class="fw-bold mb-1" style="font-size: 2rem;">Gestión de Categorías</h1>
+            <p class="mb-0" style="color: rgba(255, 255, 255, 0.88);">
+                Organiza las secciones y clasificaciones de libros y artículos de tu librería.
+            </p>
+        </div>
+        <div class="col-lg-4 d-flex justify-content-lg-end align-items-center gap-3">
+            <div class="saber-counter-box">
+                <div class="small" style="color: rgba(255, 255, 255, 0.85);">Total registradas</div>
+                <div class="fw-bold fs-4 lh-1 mt-1">@Model.Categorias.Count</div>
+            </div>
+            <button type="button" class="saber-btn-white" data-bs-toggle="modal" data-bs-target="#modalCategoria">
+                + Nueva Categoría
+            </button>
+        </div>
+    </div>
+</div>
 
-<!-- Modal Agregar Categoría -->
+<div class="saber-card">
+    <div class="saber-card-header">
+        <div>
+            <h5 class="fw-bold text-primary mb-0">Listado de Categorías</h5>
+            <small class="text-muted">Visualiza y administra todas las categorías activas</small>
+        </div>
+        <div>
+            <input type="search" id="buscarCategoria" class="form-control saber-search" placeholder="Buscar categoría..." />
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table saber-table mb-0" id="tablaCategorias">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Categorias.Count == 0)
+                {
+                    <tr>
+                        <td colspan="2" class="saber-empty-state">
+                            <div class="fw-bold text-primary fs-5 mb-1">No hay categorías registradas aún</div>
+                            <div class="text-muted mb-4">Haz clic en "+ Nueva Categoría" para crear la primera.</div>
+                            <button type="button" class="saber-btn-primary" data-bs-toggle="modal" data-bs-target="#modalCategoria">
+                                + Agregar Categoría
+                            </button>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var cat in Model.Categorias)
+                    {
+                        <tr>
+                            <td class="fw-semibold text-dark">@cat.Nombre</td>
+                            <td>@cat.Descripcion</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <div class="modal fade" id="modalCategoria" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content border-primary">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <form method="post">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Nueva Categoría</h5>
+                <div class="modal-header text-white" style="background: linear-gradient(90deg, #0a3d91 0%, #1565c0 100%);">
+                    <h5 class="modal-title fw-bold">Nueva Categoría</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label">Nombre</label>
-                        <input asp-for="NuevaCategoria.Nombre" class="form-control" required />
+                        <label class="form-label fw-semibold">Nombre</label>
+                        <input asp-for="NuevaCategoria.Nombre" class="form-control rounded-3" required />
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Descripción</label>
-                        <input asp-for="NuevaCategoria.Descripcion" class="form-control" />
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Descripción</label>
+                        <input asp-for="NuevaCategoria.Descripcion" class="form-control rounded-3" />
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
+                <div class="modal-footer bg-light px-4 py-3">
+                    <button type="button" class="btn btn-outline-secondary rounded-3 px-3" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="saber-btn-primary">Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.getElementById("buscarCategoria")?.addEventListener("input", function () {
+            const term = this.value.toLowerCase().trim();
+            const rows = document.querySelectorAll("#tablaCategorias tbody tr");
+            rows.forEach(row => {
+                if (row.querySelector(".saber-empty-state")) return;
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(term) ? "" : "none";
+            });
+        });
+    </script>
+}
