@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using WebApplication1.DTOs;
+using Contratos;
 using WebApplication1.Interfaces;
 
 namespace WebApplication1.Controllers
@@ -31,17 +31,26 @@ namespace WebApplication1.Controllers
             return Ok(venta);
         }
 
+        [HttpGet("{id:guid}/factura")]
+        public async Task<IActionResult> ObtenerFactura(Guid id)
+        {
+            var factura = await _ventaService.ObtenerFacturaPorVentaIdAsync(id);
+            if (factura == null)
+                return NotFound("Factura no encontrada para esta venta.");
+            return Ok(factura);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Registrar([FromBody] VentaDto ventaDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var resultado = await _ventaService.RegistrarVentaAsync(ventaDto);
-            if (resultado.StartsWith("Error"))
-                return BadRequest(resultado);
+            var resultado = await _ventaService.RegistrarVentaConResultadoAsync(ventaDto);
+            if (!resultado.Exito)
+                return BadRequest(new { Mensaje = resultado.Mensaje });
 
-            return Ok(new { Mensaje = resultado });
+            return Ok(resultado);
         }
     }
 }

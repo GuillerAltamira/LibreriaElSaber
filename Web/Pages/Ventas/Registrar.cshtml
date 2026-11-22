@@ -1,0 +1,301 @@
+@page
+@model Web.Pages.Ventas.RegistrarModel
+@{
+    ViewData["Title"] = "Registrar Venta";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Punto de Venta</h2>
+            <p class="text-muted mb-0">Registro de ventas, detalle de productos y emisión automática de facturas.</p>
+        </div>
+        <div>
+            <a asp-page="/Ventas/Historial" class="btn btn-outline-secondary">
+                <i class="bi bi-clock-history"></i> Ver Historial de Ventas
+            </a>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.MensajeError))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error:</strong> @Model.MensajeError
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <form method="post" id="formVenta">
+        <input type="hidden" asp-for="DetallesJson" id="DetallesJson" />
+
+        <div class="row g-4">
+            <!-- Datos del Cliente y Facturación -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h5 class="card-title mb-0 fs-6 fw-semibold">
+                            <i class="bi bi-person-badge me-2"></i> Datos de Facturación
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">NIT / CI del Cliente <span class="text-danger">*</span></label>
+                            <input type="text" asp-for="Nit" class="form-control" placeholder="Ej: 1023456023" required />
+                            <div class="form-text">Para emisión de factura oficial.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Nombre o Razón Social <span class="text-danger">*</span></label>
+                            <input type="text" asp-for="RazonSocial" class="form-control" placeholder="Ej: Juan Pérez o Librería Sur" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Nombre del Comprador (Opcional)</label>
+                            <input type="text" asp-for="ClienteNombre" class="form-control" placeholder="Ej: Juan Pérez" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumen de Totales y Envío -->
+                <div class="card shadow-sm border-0 border-top border-primary border-4">
+                    <div class="card-body">
+                        <h6 class="text-muted text-uppercase fw-bold fs-7 mb-3">Resumen de la Venta</h6>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Artículos totales:</span>
+                            <strong id="resumenCantidad">0</strong>
+                        </div>
+                        <hr class="my-2" />
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <span class="fs-5 fw-bold">Total a Pagar:</span>
+                            <span class="fs-4 fw-bold text-success" id="resumenTotal">Bs. 0.00</span>
+                        </div>
+                        <button type="submit" id="btnConfirmar" class="btn btn-success btn-lg w-100 py-3 fw-bold" disabled>
+                            Emitir Venta y Factura
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selección de Productos y Detalle de Venta -->
+            <div class="col-lg-8">
+                <!-- Selector de Productos -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-light py-3">
+                        <h5 class="card-title mb-0 fs-6 fw-semibold">
+                            <i class="bi bi-cart-plus me-2"></i> Selección de Producto
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-7">
+                                <label class="form-label fw-semibold">Producto</label>
+                                <select id="selectProducto" class="form-select">
+                                    <option value="">-- Seleccionar producto del catálogo --</option>
+                                    @foreach (var prod in Model.ProductosDisponibles)
+                                    {
+                                        <option value="@prod.Id" 
+                                                data-nombre="@prod.Nombre" 
+                                                data-precio="@prod.Precio" 
+                                                data-stock="@prod.Stock"
+                                                disabled="@(prod.Stock <= 0 ? "disabled" : null)">
+                                            @prod.Nombre — Bs. @prod.Precio.ToString("0.00") @(prod.Stock <= 0 ? " (AGOTADO)" : $" (Stock: {prod.Stock})")
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Cantidad</label>
+                                <input type="number" id="inputCantidad" class="form-control" value="1" min="1" />
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" id="btnAgregar" class="btn btn-primary w-100">
+                                    Agregar
+                                </button>
+                            </div>
+                        </div>
+                        <div id="infoStock" class="mt-2 text-muted small"></div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Detalle de Venta -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 fs-6 fw-semibold">
+                            <i class="bi bi-receipt me-2"></i> Detalle de la Venta
+                        </h5>
+                        <button type="button" id="btnLimpiar" class="btn btn-sm btn-outline-danger" style="display:none;">
+                            Vaciar Carrito
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" id="tablaDetalles">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 45%;">Producto</th>
+                                        <th class="text-center" style="width: 15%;">P. Unitario</th>
+                                        <th class="text-center" style="width: 15%;">Cantidad</th>
+                                        <th class="text-end" style="width: 15%;">Subtotal</th>
+                                        <th class="text-center" style="width: 10%;">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cuerpoTabla">
+                                    <tr id="filaVacia">
+                                        <td colspan="5" class="text-center py-5 text-muted">
+                                            <i class="bi bi-basket3 fs-2 d-block mb-2"></i>
+                                            No hay productos en el detalle de venta.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+    let detalleVenta = [];
+
+    const selectProducto = document.getElementById('selectProducto');
+    const inputCantidad = document.getElementById('inputCantidad');
+    const btnAgregar = document.getElementById('btnAgregar');
+    const btnLimpiar = document.getElementById('btnLimpiar');
+    const cuerpoTabla = document.getElementById('cuerpoTabla');
+    const filaVacia = document.getElementById('filaVacia');
+    const resumenCantidad = document.getElementById('resumenCantidad');
+    const resumenTotal = document.getElementById('resumenTotal');
+    const btnConfirmar = document.getElementById('btnConfirmar');
+    const hiddenDetalles = document.getElementById('DetallesJson');
+    const infoStock = document.getElementById('infoStock');
+
+    selectProducto.addEventListener('change', function() {
+        const selected = selectProducto.options[selectProducto.selectedIndex];
+        if (selected && selected.value) {
+            const stock = parseInt(selected.getAttribute('data-stock')) || 0;
+            const precio = parseFloat(selected.getAttribute('data-precio')) || 0;
+            infoStock.innerHTML = `<span class="badge bg-info text-dark">Precio: Bs. ${precio.toFixed(2)}</span> <span class="badge ${stock > 5 ? 'bg-success' : 'bg-warning text-dark'}">Stock disponible: ${stock}</span>`;
+            inputCantidad.max = stock;
+            if (parseInt(inputCantidad.value) > stock) {
+                inputCantidad.value = stock;
+            }
+        } else {
+            infoStock.innerHTML = '';
+        }
+    });
+
+    btnAgregar.addEventListener('click', function() {
+        const selected = selectProducto.options[selectProducto.selectedIndex];
+        if (!selected || !selected.value) {
+            alert('Por favor selecciona un producto.');
+            return;
+        }
+
+        const id = selected.value;
+        const nombre = selected.getAttribute('data-nombre');
+        const precio = parseFloat(selected.getAttribute('data-precio')) || 0;
+        const stock = parseInt(selected.getAttribute('data-stock')) || 0;
+        const cantidad = parseInt(inputCantidad.value) || 0;
+
+        if (cantidad <= 0) {
+            alert('La cantidad debe ser mayor a 0.');
+            return;
+        }
+
+        const itemExistente = detalleVenta.find(x => x.productoId === id);
+        const cantidadPrevia = itemExistente ? itemExistente.cantidad : 0;
+        const nuevaCantidadTotal = cantidadPrevia + cantidad;
+
+        if (nuevaCantidadTotal > stock) {
+            alert(`Stock insuficiente. Disponible: ${stock}. Ya tienes ${cantidadPrevia} en el detalle.`);
+            return;
+        }
+
+        if (itemExistente) {
+            itemExistente.cantidad = nuevaCantidadTotal;
+            itemExistente.subtotal = itemExistente.cantidad * precio;
+        } else {
+            detalleVenta.push({
+                productoId: id,
+                nombre: nombre,
+                precio: precio,
+                cantidad: cantidad,
+                stockMax: stock,
+                subtotal: cantidad * precio
+            });
+        }
+
+        inputCantidad.value = 1;
+        selectProducto.value = '';
+        infoStock.innerHTML = '';
+        renderDetalles();
+    });
+
+    function eliminarItem(index) {
+        detalleVenta.splice(index, 1);
+        renderDetalles();
+    }
+
+    btnLimpiar.addEventListener('click', function() {
+        if (confirm('¿Deseas vaciar todo el detalle de venta?')) {
+            detalleVenta = [];
+            renderDetalles();
+        }
+    });
+
+    function renderDetalles() {
+        if (detalleVenta.length === 0) {
+            cuerpoTabla.innerHTML = '';
+            cuerpoTabla.appendChild(filaVacia);
+            btnLimpiar.style.display = 'none';
+            btnConfirmar.disabled = true;
+            resumenCantidad.textContent = '0';
+            resumenTotal.textContent = 'Bs. 0.00';
+            hiddenDetalles.value = '[]';
+            return;
+        }
+
+        cuerpoTabla.innerHTML = '';
+        btnLimpiar.style.display = 'inline-block';
+        btnConfirmar.disabled = false;
+
+        let totalArticulos = 0;
+        let totalBs = 0;
+
+        detalleVenta.forEach((item, index) => {
+            totalArticulos += item.cantidad;
+            totalBs += item.subtotal;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>
+                    <span class="fw-semibold">${item.nombre}</span>
+                </td>
+                <td class="text-center">Bs. ${item.precio.toFixed(2)}</td>
+                <td class="text-center">
+                    <span class="badge bg-secondary fs-7">${item.cantidad}</span>
+                </td>
+                <td class="text-end fw-semibold">Bs. ${item.subtotal.toFixed(2)}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarItem(${index})" title="Quitar">
+                        ✕
+                    </button>
+                </td>
+            `;
+            cuerpoTabla.appendChild(tr);
+        });
+
+        resumenCantidad.textContent = totalArticulos;
+        resumenTotal.textContent = `Bs. ${totalBs.toFixed(2)}`;
+
+        const dataParaServidor = detalleVenta.map(item => ({
+            productoId: item.productoId,
+            cantidad: item.cantidad
+        }));
+        hiddenDetalles.value = JSON.stringify(dataParaServidor);
+    }
+</script>
+}
