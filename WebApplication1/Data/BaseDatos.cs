@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using WebApplication1.Models;
 
 namespace WebApplication1.Data
@@ -25,10 +25,23 @@ namespace WebApplication1.Data
         public DbSet<Venta> ventas { get; set; }
         public DbSet<DetalleVenta> detallesVenta { get; set; }
         public DbSet<Factura> facturas { get; set; }
+        public DbSet<Usuario> usuarios { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // USUARIO
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.ToTable("usuarios");
+                entity.HasKey(u => u.Id);
+                entity.Property(u => u.NombreCompleto).IsRequired().HasMaxLength(100);
+                entity.Property(u => u.NombreUsuario).IsRequired().HasMaxLength(50);
+                entity.HasIndex(u => u.NombreUsuario).IsUnique();
+                entity.Property(u => u.Password).IsRequired().HasMaxLength(200);
+                entity.Property(u => u.Rol).IsRequired().HasMaxLength(30);
+            });
 
             // CATEGORIA
             modelBuilder.Entity<Categoria>(entity =>

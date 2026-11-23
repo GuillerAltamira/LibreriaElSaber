@@ -1,10 +1,138 @@
 ﻿@page
 @model IndexModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Inicio";
+    var nombreUsuario = HttpContextAccessor.HttpContext?.Session.GetString("NombreCompleto") ?? "Usuario";
+    var rol = HttpContextAccessor.HttpContext?.Session.GetString("Rol") ?? "Usuario";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    .hero-libreria {
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(29, 78, 216, 0.82) 100%);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(96, 165, 250, 0.3);
+    }
+
+    .tarjeta-modulo {
+        background: rgba(15, 23, 42, 0.78);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid rgba(96, 165, 250, 0.25);
+        color: #f8fafc;
+        transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                    box-shadow 0.3s ease,
+                    border-color 0.3s ease,
+                    background 0.3s ease;
+    }
+
+    .tarjeta-modulo:hover {
+        transform: translateY(-8px) scale(1.015);
+        background: rgba(30, 58, 138, 0.85);
+        border-color: #60a5fa;
+        box-shadow: 0 20px 35px -10px rgba(37, 99, 235, 0.45);
+    }
+
+    .tarjeta-modulo .icono-modulo {
+        width: 52px;
+        height: 52px;
+        font-size: 1.55rem;
+        background: rgba(59, 130, 246, 0.2);
+        border: 1px solid rgba(96, 165, 250, 0.35);
+        transition: transform 0.3s ease, background 0.3s ease;
+    }
+
+    .tarjeta-modulo:hover .icono-modulo {
+        transform: scale(1.12) rotate(-4deg);
+        background: rgba(59, 130, 246, 0.38);
+    }
+
+    .tarjeta-modulo .texto-desc {
+        color: #cbd5e1;
+    }
+</style>
+
+<div class="p-4 p-md-5 mb-4 text-white rounded-4 shadow-lg hero-libreria">
+    <div class="col-lg-8 px-0">
+        <span class="badge bg-info text-dark fw-semibold mb-2 px-3 py-2 rounded-pill">Librería y Papelería "El Saber" · @rol</span>
+        <h1 class="display-5 fw-bold mt-2">¡Bienvenido, @nombreUsuario!</h1>
+        <p class="lead my-3 text-light opacity-75">
+            Sistema integral de gestión de inventario y catálogo. Selecciona un módulo disponible para comenzar.
+        </p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card h-100 rounded-4 tarjeta-modulo">
+            <div class="card-body p-4 d-flex flex-column">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-3 mb-3 icono-modulo">
+                    🏷️
+                </div>
+                <h5 class="card-title fw-bold text-white">Categorías</h5>
+                <p class="card-text small flex-grow-1 texto-desc">
+                    Organiza y administra las líneas de artículos, útiles escolares y textos de la librería.
+                </p>
+                <a asp-page="/Categorias/Index" class="btn btn-outline-info fw-semibold mt-3">
+                    Ir a Categorías &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 rounded-4 tarjeta-modulo">
+            <div class="card-body p-4 d-flex flex-column">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-3 mb-3 icono-modulo">
+                    📦
+                </div>
+                <h5 class="card-title fw-bold text-white">Productos</h5>
+                <p class="card-text small flex-grow-1 texto-desc">
+                    Gestiona el catálogo completo, precios, existencias en stock e imágenes del inventario.
+                </p>
+                <a asp-page="/Productos/Index" class="btn btn-primary fw-semibold mt-3 shadow-sm">
+                    Ir a Productos &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @if (rol == "Administrador")
+    {
+        <div class="col-md-4">
+            <div class="card h-100 rounded-4 tarjeta-modulo">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-3 mb-3 icono-modulo">
+                        🛒
+                    </div>
+                    <h5 class="card-title fw-bold text-white">Compras</h5>
+                    <p class="card-text small flex-grow-1 texto-desc">
+                        Registra el abastecimiento de mercadería, facturas de proveedores y entradas de stock.
+                    </p>
+                    <a asp-page="/Compras/Index" class="btn btn-outline-info fw-semibold mt-3">
+                        Ir a Compras &rarr;
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 rounded-4 tarjeta-modulo">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-3 mb-3 icono-modulo">
+                        👥
+                    </div>
+                    <h5 class="card-title fw-bold text-white">Usuarios</h5>
+                    <p class="card-text small flex-grow-1 texto-desc">
+                        Administra las cuentas registradas, asigna roles de acceso y gestiona el personal.
+                    </p>
+                    <a asp-page="/Usuarios/Index" class="btn btn-outline-info fw-semibold mt-3">
+                        Ir a Usuarios &rarr;
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
 </div>
