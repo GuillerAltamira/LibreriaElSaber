@@ -223,8 +223,9 @@ namespace Web.Pages.Proveedores
         // Botón "Guardar" del modal Nuevo
         public async Task<IActionResult> OnPostCrearAsync()
         {
+            // Si falta algo, cada error ya sale debajo de su campo
             if (!FormularioValido(nameof(NuevoProveedor)))
-                return await MostrarError("Revisa los campos del formulario.", "nuevo");
+                return await MostrarModal("nuevo");
 
             var client = _httpClientFactory.CreateClient("LibreriaApi");
             var response = await client.PostAsJsonAsync("api/Proveedor", NuevoProveedor);
@@ -235,17 +236,21 @@ namespace Web.Pages.Proveedores
                 return RedirectToPage(RutaActual());
             }
 
-            var error = response.StatusCode == HttpStatusCode.Conflict
-                ? await response.Content.ReadAsStringAsync()      // "Ya existe un proveedor con ese NIT."
-                : "Error al registrar el proveedor.";
-            return await MostrarError(error, "nuevo");
+            if (response.StatusCode == HttpStatusCode.Conflict)
+            {
+                // "Ya existe un proveedor con ese NIT." -> debajo del campo NIT
+                ModelState.AddModelError("NuevoProveedor.Nit", await response.Content.ReadAsStringAsync());
+                return await MostrarModal("nuevo");
+            }
+
+            return await MostrarModal("nuevo", "Error al registrar el proveedor.");
         }
 
         // Botón "Guardar cambios" del modal Editar
         public async Task<IActionResult> OnPostEditarAsync()
         {
             if (!FormularioValido(nameof(ProveedorEditado)))
-                return await MostrarError("Revisa los campos del formulario.", "editar");
+                return await MostrarModal("editar");
 
             var client = _httpClientFactory.CreateClient("LibreriaApi");
             var response = await client.PutAsJsonAsync($"api/Proveedor/{IdEditar}", ProveedorEditado);
@@ -256,10 +261,17 @@ namespace Web.Pages.Proveedores
                 return RedirectToPage(RutaActual());
             }
 
-            var error = response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Conflict
+            if (response.StatusCode == HttpStatusCode.Conflict)
+            {
+                // "Ya existe otro proveedor con ese NIT." -> debajo del campo NIT
+                ModelState.AddModelError("ProveedorEditado.Nit", await response.Content.ReadAsStringAsync());
+                return await MostrarModal("editar");
+            }
+
+            var error = response.StatusCode == HttpStatusCode.NotFound
                 ? await response.Content.ReadAsStringAsync()
                 : "Error al actualizar el proveedor.";
-            return await MostrarError(error, "editar");
+            return await MostrarModal("editar", error);
         }
 
         // Botón de activar / desactivar de cada fila
@@ -293,11 +305,15 @@ namespace Web.Pages.Proveedores
             return RedirectToPage(RutaActual());
         }
 
-        // Vuelve a mostrar la página con el error y el modal abierto
-        private async Task<IActionResult> MostrarError(string mensaje, string modal)
+        // Vuelve a mostrar la página con el modal abierto.
+        // Los errores de cada campo salen debajo del campo; "mensaje" es solo para errores generales.
+        private async Task<IActionResult> MostrarModal(string modal, string? mensaje = null)
         {
-            Mensaje = mensaje;
-            EsError = true;
+            if (mensaje != null)
+            {
+                Mensaje = mensaje;
+                EsError = true;
+            }
             ModalAbierto = modal;
             await CargarDatosAsync();
             return Page();

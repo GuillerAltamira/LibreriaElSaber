@@ -1,9 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Contratos
 {
     public class ProveedorDto
     {
+        // Lo usa el módulo de Compras para llenar la lista de proveedores
+        public Guid Id { get; set; }
+
         [Required(ErrorMessage = "El nombre es obligatorio")]
         [StringLength(100, ErrorMessage = "Máximo 100 caracteres")]
         public string Nombre { get; set; } = string.Empty;
