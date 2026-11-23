@@ -61,5 +61,11 @@ namespace WebApplication1.Controllers
                 return NotFound("El proveedor no se encuentra registrado.");
             return Ok(historial);
         }
+
+        [HttpGet("resumen-compras")]
+        public IActionResult ResumenCompras()
+        {
+            return Ok(_proveedorService.ObtenerResumenCompras());
+        }
     }
 }

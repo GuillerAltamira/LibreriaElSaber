@@ -91,5 +91,20 @@ namespace WebApplication1.Services
                 })
                 .ToList();
         }
+
+        // Cuántas compras y cuánto se le compró a cada proveedor
+        public IEnumerable<ResumenProveedorDto> ObtenerResumenCompras()
+        {
+            return _context.compras
+                .GroupBy(c => c.ProveedorId)
+                .Select(g => new ResumenProveedorDto
+                {
+                    ProveedorId = g.Key,
+                    CantidadCompras = g.Count(),
+                    TotalComprado = g.Sum(c => c.Total),
+                    UltimaCompra = g.Max(c => (DateTime?)c.Fecha)
+                })
+                .ToList();
+        }
     }
 }

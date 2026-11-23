@@ -1,0 +1,103 @@
+﻿/* ===== Banner con los datos del proveedor ===== */
+.banner {
+    background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%);
+    color: white;
+    border-radius: 18px;
+    padding: 24px 28px;
+    box-shadow: 0 8px 24px rgba(13, 110, 253, 0.25);
+}
+
+.avatar-grande {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    border: 3px solid rgba(255, 255, 255, 0.6);
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===== Tarjetas de colores ===== */
+.stat {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    padding: 18px 20px;
+    color: white;
+    height: 100%;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    transition: transform 0.15s;
+}
+
+    .stat:hover {
+        transform: translateY(-4px);
+    }
+
+.stat-azul {
+    background: linear-gradient(135deg, #0d6efd, #3d8bfd);
+}
+
+.stat-verde {
+    background: linear-gradient(135deg, #198754, #20c997);
+}
+
+.stat-naranja {
+    background: linear-gradient(135deg, #fd7e14, #ffc107);
+}
+
+.stat-morado {
+    background: linear-gradient(135deg, #6f42c1, #d63384);
+}
+
+.stat-titulo {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-numero {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+/* Para el nombre del producto (texto largo) */
+.stat-texto {
+    font-size: 1.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 40px;
+}
+
+.stat-pie {
+    font-size: 0.8rem;
+    opacity: 0.85;
+}
+
+.stat-icono {
+    position: absolute;
+    right: 14px;
+    bottom: 6px;
+    font-size: 3.2rem;
+    opacity: 0.25;
+}
+
+/* ===== Facturas ===== */
+.card {
+    border: 0;
+    border-radius: 16px;
+}
+
+.cabecera th {
+    background: #f1f4ff;
+    color: #3b4a6b;
+}
+
+.monto {
+    background: linear-gradient(135deg, #0d6efd, #6f42c1);
+}

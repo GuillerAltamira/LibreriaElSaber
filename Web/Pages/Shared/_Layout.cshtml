@@ -1,13 +1,13 @@
-﻿@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor HttpContextAccessor
 @{
     var nombreCompleto = HttpContextAccessor.HttpContext?.Session.GetString("NombreCompleto");
     var rol = HttpContextAccessor.HttpContext?.Session.GetString("Rol");
     var rutaActual = Context.Request.Path.Value?.ToLower() ?? "";
 
-    if (string.IsNullOrEmpty(nombreCompleto))
+    if (string.IsNullOrEmpty(nombreCompleto) && !rutaActual.StartsWith("/login"))
     {
-        Context.Response.Redirect("/Login");
+        Context.Response.Redirect("/Login/Index");
     }
     else if (rol != "Administrador" && (rutaActual.StartsWith("/compras") || rutaActual.StartsWith("/usuarios")))
     {
@@ -24,24 +24,13 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Web.styles.css" asp-append-version="true" />
-    <!--
-    <style>
-        .navbar-azul {
-            background: linear-gradient(90deg, #0f172a 0%, #1d4ed8 60%, #2563eb 100%);
-        }
-        .footer-azul {
-            background-color: #0f172a;
-            color: #cbd5e1;
-        }
-    </style> 
-    -->
     <style>
         .navbar-azul {
             background: linear-gradient(90deg, #060d1f 0%, #1e3a8a 55%, #1d4ed8 100%);
             border-bottom: 1px solid rgba(96, 165, 250, 0.25);
         }
         .fondo-libreria {
-            background-image: 
+            background-image:
                 linear-gradient(135deg, rgba(6, 13, 31, 0.88) 0%, rgba(15, 23, 42, 0.84) 50%, rgba(29, 78, 216, 0.78) 100%),
                 url('/images/fondo-libreria.jpg');
             background-size: cover;
@@ -56,7 +45,6 @@
     </style>
 </head>
 
-<!-- <body class="d-flex flex-column min-vh-100 bg-light"> -->
 <body class="d-flex flex-column min-vh-100 fondo-libreria">
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark navbar-azul shadow-sm mb-4">
@@ -78,6 +66,9 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-white" asp-area="" asp-page="/Productos/Index">Productos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-area="" asp-page="/Proveedores/Index">Proveedores</a>
                         </li>
 
                         @if (rol == "Administrador")
