@@ -9,7 +9,7 @@ namespace WebApplication1.Interfaces
         Producto? ObtenerPorId(Guid id);
         string Crear(ProductoDto productoDto);
         string Modificar(Guid id, ProductoDto productoDto);
-        bool Eliminar(Guid id);
+        string? Eliminar(Guid id);   // null = eliminado, si no devuelve el motivo
         int ConsultarStock(Guid id);
     }
 }

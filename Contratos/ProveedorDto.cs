@@ -1,8 +1,9 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Contratos
 {
-    public class ProveedorDto
+    // IValidatableObject: permite una regla que mira VARIOS campos a la vez
+    public class ProveedorDto : IValidatableObject
     {
         // Lo usa el módulo de Compras para llenar la lista de proveedores
         public Guid Id { get; set; }
@@ -28,5 +29,17 @@ namespace Contratos
         public string? Direccion { get; set; }
 
         public bool Activo { get; set; } = true;
+
+        // Regla: al menos un dato de contacto (teléfono o correo).
+        // Se revisa en la Web y también en la API, porque las dos usan este DTO.
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (string.IsNullOrWhiteSpace(Telefono) && string.IsNullOrWhiteSpace(Correo))
+            {
+                yield return new ValidationResult(
+                    "Ingresa al menos un teléfono o un correo.",
+                    new[] { nameof(Telefono), nameof(Correo) });
+            }
+        }
     }
 }

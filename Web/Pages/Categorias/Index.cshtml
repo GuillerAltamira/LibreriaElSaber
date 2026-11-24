@@ -5,6 +5,12 @@
 }
 
 <style>
+    /* Campo con error: borde rojo (el mensaje sale debajo) */
+    .input-validation-error {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+    }
+
     .saber-banner {
         background: linear-gradient(90deg, #0a3d91 0%, #1565c0 55%, #0288d1 100%);
         border-radius: 16px;
@@ -142,9 +148,12 @@
                 <div class="small" style="color: rgba(255, 255, 255, 0.85);">Total registradas</div>
                 <div class="fw-bold fs-4 lh-1 mt-1">@Model.Categorias.Count</div>
             </div>
-            <button type="button" class="saber-btn-white" data-bs-toggle="modal" data-bs-target="#modalCategoria">
-                + Nueva Categoría
-            </button>
+            @if (Model.EsAdmin)
+            {
+                <button type="button" class="saber-btn-white" data-bs-toggle="modal" data-bs-target="#modalCategoria">
+                    + Nueva Categoría
+                </button>
+            }
         </div>
     </div>
 </div>
@@ -174,10 +183,13 @@
                     <tr>
                         <td colspan="2" class="saber-empty-state">
                             <div class="fw-bold text-primary fs-5 mb-1">No hay categorías registradas aún</div>
-                            <div class="text-muted mb-4">Haz clic en "+ Nueva Categoría" para crear la primera.</div>
-                            <button type="button" class="saber-btn-primary" data-bs-toggle="modal" data-bs-target="#modalCategoria">
-                                + Agregar Categoría
-                            </button>
+                            @if (Model.EsAdmin)
+                            {
+                                <div class="text-muted mb-4">Haz clic en "+ Nueva Categoría" para crear la primera.</div>
+                                <button type="button" class="saber-btn-primary" data-bs-toggle="modal" data-bs-target="#modalCategoria">
+                                    + Agregar Categoría
+                                </button>
+                            }
                         </td>
                     </tr>
                 }
@@ -196,6 +208,9 @@
     </div>
 </div>
 
+@* Formulario de agregar: solo para el Administrador *@
+@if (Model.EsAdmin)
+{
 <div class="modal fade" id="modalCategoria" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
@@ -207,11 +222,13 @@
                 <div class="modal-body p-4">
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Nombre</label>
-                        <input asp-for="NuevaCategoria.Nombre" class="form-control rounded-3" required />
+                        <input asp-for="NuevaCategoria.Nombre" class="form-control rounded-3" required maxlength="100" />
+                        <span asp-validation-for="NuevaCategoria.Nombre" class="text-danger small"></span>
                     </div>
                     <div class="mb-2">
                         <label class="form-label fw-semibold">Descripción</label>
-                        <input asp-for="NuevaCategoria.Descripcion" class="form-control rounded-3" />
+                        <input asp-for="NuevaCategoria.Descripcion" class="form-control rounded-3" maxlength="250" />
+                        <span asp-validation-for="NuevaCategoria.Descripcion" class="text-danger small"></span>
                     </div>
                 </div>
                 <div class="modal-footer bg-light px-4 py-3">
@@ -222,8 +239,16 @@
         </div>
     </div>
 </div>
+}
 
 @section Scripts {
+    @if (Model.AbrirModal)
+    {
+        <!-- Si hubo error, vuelve a abrir el modal con lo que escribió -->
+        <script>
+            window['bootstrap'].Modal.getOrCreateInstance(document.getElementById('modalCategoria')).show();
+        </script>
+    }
     <script>
         document.getElementById("buscarCategoria")?.addEventListener("input", function () {
             const term = this.value.toLowerCase().trim();

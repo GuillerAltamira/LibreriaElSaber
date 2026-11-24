@@ -47,6 +47,20 @@ namespace WebApplication1.Services
             return ObtenerTodas().FirstOrDefault(c => c.Id == id);
         }
 
+        // Busca el número más alto "FC-000123" y devuelve el siguiente: "FC-000124"
+        public string SiguienteNumeroFactura()
+        {
+            var maximo = _context.compras
+                .Where(c => c.NumeroFactura.StartsWith("FC-"))
+                .Select(c => c.NumeroFactura)
+                .AsEnumerable()
+                .Select(n => int.TryParse(n.Substring(3), out var x) ? x : 0)
+                .DefaultIfEmpty(0)
+                .Max();
+
+            return $"FC-{maximo + 1:D6}";
+        }
+
         public string Registrar(CompraDto compraDto)
         {
             if (compraDto.Detalles == null || !compraDto.Detalles.Any())
@@ -56,9 +70,14 @@ namespace WebApplication1.Services
             if (proveedor == null)
                 return "Error: El proveedor no se encuentra registrado.";
 
+            // Número de factura automático si no lo mandan
+            var numeroFactura = string.IsNullOrWhiteSpace(compraDto.NumeroFactura)
+                ? SiguienteNumeroFactura()
+                : compraDto.NumeroFactura.Trim();
+
             bool facturaExiste = _context.compras.Any(c =>
                 c.ProveedorId == compraDto.ProveedorId &&
-                c.NumeroFactura == compraDto.NumeroFactura);
+                c.NumeroFactura == numeroFactura);
 
             if (facturaExiste)
                 return "Error: El proveedor ya tiene registrada esa factura.";
@@ -67,7 +86,7 @@ namespace WebApplication1.Services
             {
                 Id = Guid.NewGuid(),
                 ProveedorId = compraDto.ProveedorId,
-                NumeroFactura = compraDto.NumeroFactura,
+                NumeroFactura = numeroFactura,
                 Fecha = DateTime.Now,
                 Total = 0,
                 Detalles = new List<DetalleCompra>()
@@ -124,7 +143,7 @@ namespace WebApplication1.Services
             _context.compras.Add(nuevaCompra);
             _context.SaveChanges();
 
-            return "Compra registrada exitosamente, inventario actualizado y costos verificados.";
+            return $"Compra {numeroFactura} registrada exitosamente, inventario actualizado y costos verificados.";
         }
     }
 }

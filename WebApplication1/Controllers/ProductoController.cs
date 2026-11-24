@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Contratos;
 using WebApplication1.Interfaces;
 
 namespace WebApplication1.Controllers
 {
+    // Necesita token: sin login la API responde 401
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ProductoController : ControllerBase
@@ -41,28 +44,33 @@ namespace WebApplication1.Controllers
             return Ok(new { Mensaje = "Stock consultado exitosamente", StockDisponible = stock });
         }
 
+        [Authorize(Roles = "Administrador")]   // el Usuario solo puede ver
         [HttpPost]
         public IActionResult Post(ProductoDto productoDto)
         {
             var resultado = _productoService.Crear(productoDto);
+            if (resultado.StartsWith("Error"))
+                return BadRequest(resultado.Replace("Error: ", ""));
             return Ok(resultado);
         }
 
+        [Authorize(Roles = "Administrador")]   // el Usuario solo puede ver
         [HttpPut("{id}")]
         public IActionResult Put(Guid id, ProductoDto productoDto)
         {
             var resultado = _productoService.Modificar(id, productoDto);
             if (resultado.StartsWith("Error"))
-                return NotFound(resultado);
+                return BadRequest(resultado.Replace("Error: ", ""));
             return Ok(resultado);
         }
 
+        [Authorize(Roles = "Administrador")]   // el Usuario solo puede ver
         [HttpDelete("{id}")]
         public IActionResult Delete(Guid id)
         {
-            var eliminado = _productoService.Eliminar(id);
-            if (!eliminado)
-                return NotFound("No se encontró el producto para eliminar.");
+            var error = _productoService.Eliminar(id);
+            if (error != null)
+                return BadRequest(error);
             return Ok("Producto eliminado correctamente.");
         }
     }

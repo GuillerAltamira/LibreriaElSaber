@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
@@ -279,6 +279,14 @@ namespace Web.Pages.Proveedores
         {
             var client = _httpClientFactory.CreateClient("LibreriaApi");
             var actual = await client.GetFromJsonAsync<ProveedorItem>($"api/Proveedor/{id}");
+
+            if (actual != null && string.IsNullOrWhiteSpace(actual.Telefono) && string.IsNullOrWhiteSpace(actual.Correo))
+            {
+                // Proveedor antiguo sin contacto: la API no acepta guardarlo así
+                TempData["Mensaje"] = $"\"{actual.Nombre}\" no tiene teléfono ni correo. Agrégale uno con el botón Editar y luego cambia su estado.";
+                TempData["EsError"] = "1";
+                return RedirectToPage(RutaActual());
+            }
 
             if (actual != null)
             {

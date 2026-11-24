@@ -1,4 +1,4 @@
-using Contratos;
+﻿using Contratos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Text;
@@ -54,8 +54,10 @@ namespace Web.Pages.Login
                         PropertyNameCaseInsensitive = true
                     });
 
-                    if (usuario != null)
+                    if (usuario != null && !string.IsNullOrEmpty(usuario.Token))
                     {
+                        // El token JWT: la Web lo manda sola a la API en cada pedido (TokenHandler)
+                        HttpContext.Session.SetString("Token", usuario.Token);
                         HttpContext.Session.SetString("UsuarioId", usuario.Id.ToString());
                         HttpContext.Session.SetString("NombreCompleto", usuario.NombreCompleto);
                         HttpContext.Session.SetString("NombreUsuario", usuario.NombreUsuario);

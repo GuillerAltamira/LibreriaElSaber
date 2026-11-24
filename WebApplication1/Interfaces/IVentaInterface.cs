@@ -1,4 +1,4 @@
-using WebApplication1.DTOs;
+﻿using Contratos;
 using WebApplication1.Models;
 
 namespace WebApplication1.Interfaces
@@ -7,6 +7,9 @@ namespace WebApplication1.Interfaces
     {
         IEnumerable<Venta> ObtenerTodos();
         Venta? ObtenerPorId(Guid id);
-        Task<string> RegistrarVentaAsync(VentaDto ventaDto); 
+        Task<string> RegistrarVentaAsync(VentaDto ventaDto);
+        Task<VentaResultadoDto> RegistrarVentaConResultadoAsync(VentaDto ventaDto);
+        Task<FacturaImpresaDto?> ObtenerFacturaPorVentaIdAsync(Guid ventaId);
+        string? ObtenerRazonSocialPorNit(string nit);
     }
 }

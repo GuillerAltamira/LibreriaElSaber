@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Contratos
 {
@@ -17,5 +17,8 @@ namespace Contratos
         public string NombreCompleto { get; set; } = string.Empty;
         public string NombreUsuario { get; set; } = string.Empty;
         public string Rol { get; set; } = string.Empty;
+
+        // Token JWT: el "pase" que la Web manda a la API en cada pedido (solo viene en el login)
+        public string? Token { get; set; }
     }
 }
