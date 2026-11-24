@@ -5,6 +5,12 @@
 }
 
 <style>
+    /* Campo con error: borde rojo (el mensaje sale debajo) */
+    .input-validation-error {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+    }
+
     .saber-banner {
         background: linear-gradient(90deg, #0a3d91 0%, #1565c0 55%, #0288d1 100%);
         border-radius: 16px;
@@ -143,7 +149,7 @@
 
 @if (!string.IsNullOrEmpty(Model.Mensaje))
 {
-    <div class="alert alert-primary alert-dismissible fade show rounded-3 shadow-sm mb-3" role="alert">
+    <div class="alert @(Model.EsError ? "alert-danger" : "alert-primary") alert-dismissible fade show rounded-3 shadow-sm mb-3" role="alert">
         @Model.Mensaje
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -163,9 +169,12 @@
                 <div class="small" style="color: rgba(255, 255, 255, 0.85);">Total registrados</div>
                 <div class="fw-bold fs-4 lh-1 mt-1">@Model.Productos.Count</div>
             </div>
-            <button type="button" class="saber-btn-white" data-bs-toggle="modal" data-bs-target="#modalProducto">
-                + Nuevo Producto
-            </button>
+            @if (Model.EsAdmin)
+            {
+                <button type="button" class="saber-btn-white" data-bs-toggle="modal" data-bs-target="#modalProducto">
+                    + Nuevo Producto
+                </button>
+            }
         </div>
     </div>
 </div>
@@ -191,18 +200,25 @@
                     <th>Descripción</th>
                     <th>Precio</th>
                     <th>Stock</th>
+                    @if (Model.EsAdmin)
+                    {
+                        <th class="text-end">Acciones</th>
+                    }
                 </tr>
             </thead>
             <tbody>
                 @if (Model.Productos.Count == 0)
                 {
                     <tr>
-                        <td colspan="6" class="saber-empty-state">
+                        <td colspan="@(Model.EsAdmin ? 7 : 6)" class="saber-empty-state">
                             <div class="fw-bold text-primary fs-5 mb-1">No hay productos registrados aún</div>
-                            <div class="text-muted mb-4">Haz clic en "+ Nuevo Producto" para agregar el primero.</div>
-                            <button type="button" class="saber-btn-primary" data-bs-toggle="modal" data-bs-target="#modalProducto">
-                                + Agregar Producto
-                            </button>
+                            @if (Model.EsAdmin)
+                            {
+                                <div class="text-muted mb-4">Haz clic en "+ Nuevo Producto" para agregar el primero.</div>
+                                <button type="button" class="saber-btn-primary" data-bs-toggle="modal" data-bs-target="#modalProducto">
+                                    + Agregar Producto
+                                </button>
+                            }
                         </td>
                     </tr>
                 }
@@ -228,8 +244,22 @@
                                 </span>
                             </td>
                             <td>@prod.Descripcion</td>
-                            <td class="fw-semibold">@prod.Precio</td>
-                            <td>@prod.Stock</td>
+                            <td class="fw-semibold">Bs @prod.Precio.ToString("N2")</td>
+                            <td>
+                                <span class="badge @(prod.Stock <= 5 ? "bg-danger" : "bg-success") rounded-pill px-3">@prod.Stock</span>
+                            </td>
+                            @if (Model.EsAdmin)
+                            {
+                                <td class="text-end text-nowrap">
+                                    <a asp-page="Index" asp-route-editarId="@prod.Id" class="btn btn-sm btn-outline-primary">Editar</a>
+                                    <form method="post" asp-page-handler="Eliminar" class="d-inline"
+                                          data-mensaje="¿Seguro que quieres eliminar @prod.Nombre?"
+                                          onsubmit="return confirm(this.dataset.mensaje)">
+                                        <input type="hidden" name="id" value="@prod.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                    </form>
+                                </td>
+                            }
                         </tr>
                     }
                 }
@@ -238,6 +268,9 @@
     </div>
 </div>
 
+@* Formularios de agregar y editar: solo para el Administrador *@
+@if (Model.EsAdmin)
+{
 <div class="modal fade" id="modalProducto" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
@@ -252,23 +285,28 @@
                         <select asp-for="NuevoProducto.CategoriaId" asp-items="Model.OpcionesCategorias" class="form-select rounded-3" required>
                             <option value="">-- Selecciona una categoría --</option>
                         </select>
+                        <span asp-validation-for="NuevoProducto.CategoriaId" class="text-danger small"></span>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Nombre</label>
-                        <input asp-for="NuevoProducto.Nombre" class="form-control rounded-3" required />
+                        <input asp-for="NuevoProducto.Nombre" class="form-control rounded-3" required maxlength="100" />
+                        <span asp-validation-for="NuevoProducto.Nombre" class="text-danger small"></span>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Descripción</label>
                         <input asp-for="NuevoProducto.Descripcion" class="form-control rounded-3" required />
+                        <span asp-validation-for="NuevoProducto.Descripcion" class="text-danger small"></span>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Precio</label>
-                            <input asp-for="NuevoProducto.Precio" type="number" step="0.01" class="form-control rounded-3" required />
+                            <input asp-for="NuevoProducto.Precio" type="number" step="0.01" min="0.01" class="form-control rounded-3" required />
+                        <span asp-validation-for="NuevoProducto.Precio" class="text-danger small"></span>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Stock</label>
-                            <input asp-for="NuevoProducto.Stock" type="number" class="form-control rounded-3" required />
+                            <input asp-for="NuevoProducto.Stock" type="number" min="0" class="form-control rounded-3" required />
+                        <span asp-validation-for="NuevoProducto.Stock" class="text-danger small"></span>
                         </div>
                     </div>
                     <div class="mb-2">
@@ -285,7 +323,74 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalEditarProducto" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <form method="post" asp-page-handler="Editar" enctype="multipart/form-data">
+                <input type="hidden" asp-for="IdEditar" />
+                <input type="hidden" asp-for="ProductoEditado.ImagenUrl" />
+                <div class="modal-header text-white" style="background: linear-gradient(90deg, #0a3d91 0%, #1565c0 100%);">
+                    <h5 class="modal-title fw-bold">Editar Producto</h5>
+                    <a asp-page="Index" class="btn-close btn-close-white"></a>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Categoría</label>
+                        <select asp-for="ProductoEditado.CategoriaId" asp-items="Model.OpcionesCategorias" class="form-select rounded-3" required>
+                            <option value="">-- Selecciona una categoría --</option>
+                        </select>
+                        <span asp-validation-for="ProductoEditado.CategoriaId" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nombre</label>
+                        <input asp-for="ProductoEditado.Nombre" class="form-control rounded-3" required maxlength="100" />
+                        <span asp-validation-for="ProductoEditado.Nombre" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Descripción</label>
+                        <input asp-for="ProductoEditado.Descripcion" class="form-control rounded-3" required />
+                        <span asp-validation-for="ProductoEditado.Descripcion" class="text-danger small"></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Precio</label>
+                            <input asp-for="ProductoEditado.Precio" type="number" step="0.01" min="0.01" class="form-control rounded-3" required />
+                        <span asp-validation-for="ProductoEditado.Precio" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Stock</label>
+                            <input asp-for="ProductoEditado.Stock" type="number" min="0" class="form-control rounded-3" required />
+                        <span asp-validation-for="ProductoEditado.Stock" class="text-danger small"></span>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Cambiar imagen (opcional)</label>
+                        @if (!string.IsNullOrWhiteSpace(Model.ProductoEditado.ImagenUrl))
+                        {
+                            <div class="mb-2"><img src="@Model.ProductoEditado.ImagenUrl" alt="Imagen actual" class="saber-thumb" /></div>
+                        }
+                        <input asp-for="ArchivoImagenEditar" type="file" accept="image/*" class="form-control rounded-3" />
+                    </div>
+                </div>
+                <div class="modal-footer bg-light px-4 py-3">
+                    <a asp-page="Index" class="btn btn-outline-secondary rounded-3 px-3">Cancelar</a>
+                    <button type="submit" class="saber-btn-primary">Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+}
+
 @section Scripts {
+    @if (Model.AbrirModal || Model.AbrirModalEditar)
+    {
+        <script>
+            window['bootstrap'].Modal.getOrCreateInstance(
+                document.getElementById('@(Model.AbrirModalEditar ? "modalEditarProducto" : "modalProducto")')
+            ).show();
+        </script>
+    }
     <script>
         document.getElementById("buscarProducto")?.addEventListener("input", function () {
             const term = this.value.toLowerCase().trim();

@@ -285,6 +285,9 @@
                             <input asp-for="NuevoProveedor.Correo" type="email" class="form-control" placeholder="correo@empresa.com" />
                             <span asp-validation-for="NuevoProveedor.Correo" class="text-danger small"></span>
                         </div>
+                        <div class="col-12 mb-2 mt-n2">
+                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Teléfono o correo: al menos uno es obligatorio.</small>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Dirección</label>
@@ -335,6 +338,9 @@
                             <label class="form-label">Correo</label>
                             <input asp-for="ProveedorEditado.Correo" type="email" class="form-control" />
                             <span asp-validation-for="ProveedorEditado.Correo" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12 mb-2 mt-n2">
+                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Teléfono o correo: al menos uno es obligatorio.</small>
                         </div>
                     </div>
                     <div class="mb-3">

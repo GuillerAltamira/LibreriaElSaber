@@ -1,4 +1,4 @@
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using Contratos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -14,6 +14,9 @@ namespace Web.Pages.Categorias
             _httpClientFactory = httpClientFactory;
         }
 
+        // Solo el Administrador puede agregar; el Usuario solo mira
+        public bool EsAdmin => HttpContext.Session.GetString("Rol") == "Administrador";
+
         public List<CategoriaDto> Categorias { get; set; } = new();
 
         [BindProperty]
@@ -24,40 +27,58 @@ namespace Web.Pages.Categorias
 
         public async Task OnGetAsync()
         {
-            var client = _httpClientFactory.CreateClient("LibreriaApi");
-            var data = await client.GetFromJsonAsync<List<CategoriaDto>>("api/Categoria");
-            if (data != null)
-                Categorias = data;
+            if (TempData["Mensaje"] is string mensaje)
+                Mensaje = mensaje;
+
+            try
+            {
+                var client = _httpClientFactory.CreateClient("LibreriaApi");
+                var data = await client.GetFromJsonAsync<List<CategoriaDto>>("api/Categoria");
+                if (data != null)
+                    Categorias = data;
+            }
+            catch (HttpRequestException)
+            {
+                Mensaje = "No se pudo conectar con la API. Verifica que WebApplication1 esté corriendo.";
+            }
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (string.IsNullOrWhiteSpace(NuevaCategoria.Nombre))
+            if (!EsAdmin)
             {
-                Mensaje = "El nombre de la categoría es obligatorio.";
+                TempData["Mensaje"] = "Solo el administrador puede agregar categorías.";
+                return RedirectToPage();
+            }
+
+            // Required / StringLength del CategoriaDto: el error sale debajo de cada campo
+            if (!ModelState.IsValid)
+            {
                 AbrirModal = true;
                 await OnGetAsync();
                 return Page();
             }
 
             var client = _httpClientFactory.CreateClient("LibreriaApi");
-            var response = await client.PostAsJsonAsync("api/Categoria", new CategoriaDto
-            {
-                Nombre = NuevaCategoria.Nombre,
-                Descripcion = NuevaCategoria.Descripcion
-            });
+            var response = await client.PostAsJsonAsync("api/Categoria", NuevaCategoria);
 
             if (response.IsSuccessStatusCode)
             {
-                Mensaje = "Categoría registrada correctamente.";
-                NuevaCategoria = new CategoriaDto();
+                TempData["Mensaje"] = $"Categoría \"{NuevaCategoria.Nombre.Trim()}\" registrada correctamente.";
+                return RedirectToPage();
+            }
+
+            if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                // "Ya existe una categoría con ese nombre." -> debajo del campo Nombre
+                ModelState.AddModelError("NuevaCategoria.Nombre", await response.Content.ReadAsStringAsync());
             }
             else
             {
                 Mensaje = "No se pudo registrar la categoría.";
-                AbrirModal = true;
             }
 
+            AbrirModal = true;
             await OnGetAsync();
             return Page();
         }

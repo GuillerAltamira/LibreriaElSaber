@@ -1,4 +1,5 @@
-using Contratos;
+﻿using Contratos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Interfaces;
 
@@ -15,6 +16,8 @@ namespace WebApplication1.Controllers
             _usuarioService = usuarioService;
         }
 
+        // Público: aquí se consigue el token
+        [AllowAnonymous]
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginDto loginDto)
         {
@@ -32,9 +35,16 @@ namespace WebApplication1.Controllers
             return Ok(usuario);
         }
 
+        // Público (para crear cuenta). Solo un Administrador con token puede crear otro Administrador.
+        [AllowAnonymous]
         [HttpPost("registrar")]
         public IActionResult Registrar([FromBody] RegistroUsuarioDto registroDto)
         {
+            if (!User.IsInRole("Administrador"))
+            {
+                registroDto.Rol = "Usuario";
+            }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest("Verifica que todos los campos estén completos y correctos.");
@@ -49,12 +59,14 @@ namespace WebApplication1.Controllers
             return Ok(resultado);
         }
 
+        [Authorize(Roles = "Administrador")]
         [HttpGet("usuarios")]
         public IActionResult ObtenerUsuarios()
         {
             return Ok(_usuarioService.ObtenerTodos());
         }
 
+        [Authorize(Roles = "Administrador")]
         [HttpDelete("usuarios/{id}")]
         public IActionResult EliminarUsuario(Guid id)
         {

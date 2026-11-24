@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Contratos;
 using WebApplication1.Interfaces;
 
 namespace WebApplication1.Controllers
 {
+    // Solo el Administrador (con token) puede usar Compras
+    [Authorize(Roles = "Administrador")]
     [Route("api/[controller]")]
     [ApiController]
     public class CompraController : ControllerBase

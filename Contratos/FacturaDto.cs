@@ -1,4 +1,7 @@
-namespace WebApplication1.DTOs
+using System;
+using System.Collections.Generic;
+
+namespace Contratos
 {
     public class FacturaImpresaDto
     {

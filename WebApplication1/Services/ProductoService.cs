@@ -16,7 +16,7 @@ namespace WebApplication1.Services
 
         public IEnumerable<Producto> ObtenerTodos()
         {
-            return _context.productos.ToList();
+            return _context.productos.OrderBy(p => p.Nombre).ToList();   // alfabético
         }
 
         public Producto ObtenerPorId(Guid id)
@@ -36,10 +36,14 @@ namespace WebApplication1.Services
             if (!categoriaExiste)
                 return "Error: La categoría especificada no existe.";
 
+            var nombre = dto.Nombre.Trim();
+            if (_context.productos.Any(p => p.Nombre.Trim().ToLower() == nombre.ToLower()))
+                return "Error: Ya existe un producto con ese nombre.";
+
             var nuevo = new Producto
             {
                 Id = Guid.NewGuid(),
-                Nombre = dto.Nombre,
+                Nombre = nombre,
                 Descripcion = dto.Descripcion,
                 Precio = dto.Precio,
                 Stock = dto.Stock,
@@ -62,7 +66,11 @@ namespace WebApplication1.Services
             if (!categoriaExiste)
                 return "Error: La categoría especificada no existe.";
 
-            producto.Nombre = dto.Nombre;
+            var nombre = dto.Nombre.Trim();
+            if (_context.productos.Any(p => p.Id != id && p.Nombre.Trim().ToLower() == nombre.ToLower()))
+                return "Error: Ya existe otro producto con ese nombre.";
+
+            producto.Nombre = nombre;
             producto.Descripcion = dto.Descripcion;
             producto.Precio = dto.Precio;
             producto.Stock = dto.Stock;
@@ -73,15 +81,21 @@ namespace WebApplication1.Services
             return "Producto actualizado correctamente.";
         }
 
-        public bool Eliminar(Guid id)
+        public string? Eliminar(Guid id)
         {
             var producto = _context.productos.Find(id);
             if (producto == null)
-                return false;
+                return "No se encontró el producto para eliminar.";
+
+            // No se puede borrar si ya aparece en compras o ventas (rompería el historial)
+            var usado = _context.detalleCompras.Any(d => d.ProductoId == id)
+                     || _context.detallesVenta.Any(d => d.ProductoId == id);
+            if (usado)
+                return "No se puede eliminar: el producto ya tiene compras o ventas registradas.";
 
             _context.productos.Remove(producto);
             _context.SaveChanges();
-            return true;
+            return null;
         }
     }
 }
